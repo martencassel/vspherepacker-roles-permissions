@@ -1,0 +1,32 @@
+#@data/values-schema
+---
+permissions:
+  - role_name: "Packer.Datastore"
+    entity_name: "192.168.3.50"
+    entity_type: "VMHost"
+    principal_name: "LAB.LOCAL\\packer"
+
+  - role_name: "Packer.Datastore"
+    entity_name: "datastore1"
+    entity_type: "Datastore"
+    principal_name: "LAB.LOCAL\\packer"
+
+  - role_name: "Packer.Network"
+    entity_name: "VM Network"
+    entity_type: "Network"
+    principal_name: "LAB.LOCAL\\packer"
+
+  - role_name: "Packer.Resource"
+    entity_name: "Cluster"
+    entity_type: "Cluster"
+    principal_name: "LAB.LOCAL\\packer"
+
+  - role_name: "Packer.VirtualMachine"
+    entity_name: "Templates"
+    entity_type: "Folder"
+    principal_name: "LAB.LOCAL\\packer"
+
+  - role_name: "ReadOnly"
+    entity_name: "Datacenter"
+    entity_type: "Datacenter"
+    principal_name: "LAB.LOCAL\\packer"

@@ -1,0 +1,60 @@
+#@data/values-schema
+---
+roles:
+
+  - name: "Packer.Datastore"
+    privileges:
+      - "Datastore.Browse"
+      - "Datastore.AllocateSpace"
+      - "Datastore.FileManagement"
+
+  - name: "Packer.Host"
+    privileges:
+      - "Host.Config.SystemManagement"
+
+  - name: "Packer.Network"
+    privileges:
+      - "Network.Assign"
+
+  - name: "Packer.Resource"
+    privileges:
+      - "Resource.AssignVMToPool"
+
+  - name: "Packer.VirtualMachine"
+    privileges:
+      - "Folder.Create"
+      - "vApp.Export"
+      - "VirtualMachine.Inventory.Create"
+      - "VirtualMachine.Inventory.CreateFromExisting"
+      - "VirtualMachine.Inventory.Delete"
+      - "VirtualMachine.Config.AddNewDisk"
+      - "VirtualMachine.Config.AdvancedConfig"
+      - "VirtualMachine.Config.Annotation"
+      - "VirtualMachine.Config.EditDevice"
+      - "VirtualMachine.Config.Memory"
+      - "VirtualMachine.Config.Resource"
+      - "VirtualMachine.Config.Settings"
+      - "VirtualMachine.Config.CPUCount"
+      - "VirtualMachine.Config.AddRemoveDevice"
+      - "VirtualMachine.Interact.PowerOn"
+      - "VirtualMachine.Interact.PowerOff"
+      - "VirtualMachine.Interact.PutUsbScanCodes"
+      - "VirtualMachine.Interact.DeviceConnection"
+      - "VirtualMachine.Interact.SetFloppyMedia"
+      - "VirtualMachine.Interact.SetCDMedia"
+      - "VirtualMachine.Provisioning.CreateTemplateFromVM"
+      - "VirtualMachine.Provisioning.MarkAsTemplate"
+      - "VirtualMachine.Provisioning.MarkAsVM"
+      - "VirtualMachine.State.CreateSnapshot"
+      - "Folder.Create"
+
+  - name: "Packer.ContentLibrary"
+    privileges:
+      - "ContentLibrary.AddLibraryItem"
+      - "ContentLibrary.UpdateLibraryItem"
+
+  - name: "Packer.CryptoOperations"
+    privileges:
+      - "Cryptographer.Access"
+      - "Cryptographer.Encrypt"
+
