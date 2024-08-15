@@ -1,11 +1,25 @@
-param($FileName = $(throw "FileName is required"))
+param(
+    [string]$FileName,
+    [switch]$WhatIf
+)
+
 Set-PSDebug -Trace 0
 Set-StrictMode -Version Latest -ErrorAction Stop
+
+
+
+
+
+
 
 Function VerifyPrereqs() {
     $ErrorList = @()
     if($FileName -eq $null) {
         $ErrorList += "FileName is required"
+    }
+    if (-not (Test-Path $FileName)) {
+        Write-Error "File: $FileName not found"
+        exit
     }
     $RequiredCmdlets = @("Get-VMHost", "Get-VIRole", "Get-VIPrivilege", "New-VIRole")
     for ($i = 0; $i -lt $RequiredCmdlets.Length; $i++) {
@@ -31,7 +45,10 @@ Function VerifyPrereqs() {
     return $ErrorList
 }
 
+
 Function Main() {
+    [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
+    param()
     if (-not (Test-Path $FileName)) {
         Write-Error "File: $FileName not found"
         exit
@@ -45,7 +62,6 @@ Function Main() {
     foreach($RoleDef in $RoleDefinitions) {
         $RoleName = $RoleDef.name
         $Privileges = $RoleDef.privileges
-
         $Role = Get-VIRole -Name $RoleName -ErrorAction SilentlyContinue
         if ($null -ne $Role) {
             Write-Host "Role: $RoleName already exists, skipping"
@@ -55,15 +71,36 @@ Function Main() {
         foreach($Privilege in $Privileges) {
             $PrivilegesList += Get-VIPrivilege -Id $Privilege
         }
-        Write-Host "Creating role: $RoleName, with privileges: $Privileges"
-        $NewRole = New-VIRole -Name $RoleName -Privilege $PrivilegesList   
+        Write-Host "$([bool]$WhatIf -eq $true ? 'What if: ' : '')Creating role: $RoleName, with privileges: $Privileges"            $NewRole = New-VIRole -Name $RoleName -Privilege $PrivilegesList   
+        $NewRole = New-VIRole -Name $RoleName -Privilege $PrivilegesList -WhatIf:$WhatIf
         if ($null -eq $NewRole) {
             Write-Error "Failed to create role: $RoleName"
             continue
         }
-        Write-Host "Role: $RoleName created"
-
+        Write-Host "$([bool]$WhatIf -eq $true ? 'What if: ' : '')Role: $RoleName created"    
     }
+}
+
+function Show-Help {
+    Write-Host "Usage:" -ForegroundColor Yellow
+    Write-Host "  .\ImportRoles.ps1 -FileName <path to yaml file> [-WhatIf]" -ForegroundColor Green
+    Write-Host ""
+    Write-Host "Parameters:" -ForegroundColor Yellow
+    Write-Host "  -FileName" -ForegroundColor Green
+    Write-Host "    Path to the YAML file containing role definitions." -ForegroundColor White
+    Write-Host ""
+    Write-Host "  -WhatIf" -ForegroundColor Green
+    Write-Host "    Simulates the execution of the script without making any changes." -ForegroundColor White
+    Write-Host ""
+    Write-Host "Examples:" -ForegroundColor Yellow
+    Write-Host "  .\ImportRoles.ps1 -FileName roles.yaml" -ForegroundColor Green
+    Write-Host "  .\ImportRoles.ps1 -FileName roles.yaml -WhatIf" -ForegroundColor Green
+}
+
+# Check if FileName is provided
+if (-not $FileName) {
+    Show-Help
+    exit
 }
 
 $Errors = VerifyPrereqs
@@ -71,4 +108,5 @@ if ($null -ne $Errors) {
     Write-Error ("{0}" -f $Errors)
     exit
 }
-Main
+
+Main -WhatIf:$WhatIf

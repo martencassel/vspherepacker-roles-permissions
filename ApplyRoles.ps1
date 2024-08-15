@@ -1,43 +1,45 @@
+param(
+    [string]$FileName,
+    [switch]$WhatIf = $true
+)
+
 Import-Module VMWare.VimAutomation.Core
-Import-Module PSScriptAnalyzer
 
 function Show-Help {
-    Write-Output "Usage: ApplyRoles.ps1 -FileName <path to yaml file>"
-    Write-Output "Example: ApplyRoles.ps1 -FileName ./permissions.yaml"
+    Write-Host "Usage:" -ForegroundColor Yellow
+    Write-Host "  .\ApplyRoles.ps1 -FileName <path to yaml file> [-WhatIf]" -ForegroundColor Green
+    Write-Host ""
+    Write-Host "Parameters:" -ForegroundColor Yellow
+    Write-Host "  -FileName" -ForegroundColor Green
+    Write-Host "    Path to the YAML file containing role definitions." -ForegroundColor White
+    Write-Host ""
+    Write-Host "  -WhatIf" -ForegroundColor Green
+    Write-Host "    Simulates the execution of the script without making any changes." -ForegroundColor White
+    Write-Host ""
+    Write-Host "Examples:" -ForegroundColor Yellow
+    Write-Host "  .\ApplyRoles.ps1 -FileName permissions.yaml" -ForegroundColor Green
+    Write-Host "  .\ApplyRoles.ps1 -FileName permissions.yaml -WhatIf" -ForegroundColor Green
 }
 
-
-# Function to load and validate YAML file
-function Load-YamlFile {
-
-}
-
-<#
-.SYNOPSIS
-    This script applies roles to entities in vCenter based on the permissions defined in a yaml file
-
-    1. Imports the permissions from a yaml file, specified as a parameter to the script
-
-    2. Resolves the entities in vCenter based on the entity type and entity name using 
-       Get-Folder, Get-Datacenter, Get-Cluster, Get-Datastore, Get-VirtualNetwork, Get-VMHost etc
-
-    3. Resolves each role to a vCenter role object using Get-VIRole, from the role name specified in the yaml file
-
-    Usage:
-
-    ./ApplyRoles.ps1 -FileName ./permissions.yaml
-
-    cat permissions.yaml
-#>
-param($FileName = $(throw "FileName is required"))
+ 
+ 
 Set-PSDebug -Trace 0
 Set-StrictMode -Version Latest -ErrorAction Stop
 
 
-Function VerifyPrereqs() {
+Function VerifyPrereqs {
     $ErrorList = @()
     if($FileName -eq $null) {
         $ErrorList += "FileName is required"
+    }
+
+    if (-not (Test-Path $FileName)) {
+        $ErrorList += "File: $FileName not found"
+        exit
+    }
+    if (-not (Test-Path $FileName)) {
+        Write-Error "File: $FileName not found"
+        exit
     }
     $RequiredCmdlets = @("Get-VMHost", "Get-VIRole", "Get-VIPrivilege", "New-VIRole")
     for ($i = 0; $i -lt $RequiredCmdlets.Length; $i++) {
@@ -105,11 +107,12 @@ function GetVAPIEntity {
 
 function ResolveVAPIEntities($Perms) {
     $ResolvedRecords = @()
+    Write-Host "$($WhatIf ? 'What if: ' : '')Resolving permissions with vapi objects" -ForegroundColor DarkGreen
     Write-Host "Resolving permissions with vapi objects" -ForegroundColor DarkGreen
     foreach ($record in $Perms) {
         $Entity = GetVAPIEntity -EntityType $record.entity_type -EntityName $record.entity_name
         if ($null -ne $Entity) {
-            Write-Host "Entity: $($record.entity_name) of type: $($record.entity_type) found"
+            Write-Host "$($WhatIf ? 'What if: ' : '')Entity: $($record.entity_name) of type: $($record.entity_type) found"
 
             $Role = Get-VIRole -Name $record.role_name
             if ($null -eq $Role) {
@@ -129,7 +132,7 @@ function ResolveVAPIEntities($Perms) {
             Write-Warning "Entity: $($record.entity_name) of type: $($record.entity_type) not found, skipping."
         }
     }
-    Write-Host $("Resolved entities {0} from permission file with vapi objects" -f $ResolvedRecords.Count) -ForegroundColor DarkGreen
+    Write-Host "$($WhatIf ? 'What if: ' : '')Resolved permissions with vapi objects" -ForegroundColor DarkGreen
     return $ResolvedRecords    
 }
 
@@ -142,33 +145,60 @@ function ApplyVIPermissions($resolvedList) {
         $EntityName = $record.EntityName
         $EntityType = $record.EntityType
 
-        Write-Host "Applying role: $($Role.Name) to entity: $($EntityName) of type: $($EntityType) for principal: $($PrincipalName)" -ForegroundColor DarkGreen
+        $command = "New-VIPermission -Entity $Entity -Principal $PrincipalName -Role $Role -Confirm:$false"
+        Write-Host "$($WhatIf ? 'What if: ' : '')Executing: $command" -ForegroundColor Cyan
+              
+        Write-Host "$($WhatIf ? 'What if: ' : '')Applying role: $($Role.Name) to entity: $($EntityName) of type: $($EntityType) for principal: $($PrincipalName)" -ForegroundColor DarkGreen
         try {
-            $Result = New-VIPermission -Entity $Entity -Principal $PrincipalName -Role $Role -Confirm:$false
-            Write-Host "Role: $($Role.Name) applied successfully to entity: $($EntityName) of type: $($EntityType) for principal: $($PrincipalName)" -ForegroundColor DarkGreen
+            $Result = New-VIPermission -Entity $Entity -Principal $PrincipalName -Role $Role -Confirm:$false -WhatIf:$WhatIf
+            Write-Host "$($WhatIf ? 'What if: ' : '')Role: $($Role.Name) applied successfully to entity: $($EntityName) of type: $($EntityType) for principal: $($PrincipalName)" -ForegroundColor DarkGreen
         }
         catch {
             Write-Warning "Failed to apply role: $($Role.Name) to entity: $($EntityName) of type: $($EntityType) for principal: $($PrincipalName)"
-        }
+        }    
     }
 }
 
-function Main() {
-    Write-Host "Importing permissions from file: $($FileName)" -ForegroundColor DarkGreen
+function Main {
+    [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Medium')]
+    param()
+
+    Write-Host "$($WhatIf ? 'What if: ' : '') Importing permissions from file: $($FileName)" -ForegroundColor DarkGreen
     $Perms = ImportVIPermissions -FileName $FileName
     Write-Host "Permissions imported successfully, here they are:" -ForegroundColor DarkGreen
+
     $ResolvedEntities = ResolveVAPIEntities -Perms $Perms
-    Write-Host "Applying permissions to entities" -ForegroundColor DarkGreen
+    Write-Host "$($WhatIf ? 'What if: ' : '') Permissions imported successfully, here they are:" -ForegroundColor DarkGreen
+
+
+    Write-Host "$($WhatIf ? 'What if: ' : '') Applying permissions to entities:" -ForegroundColor DarkGreen
+
     ApplyVIPermissions -resolvedList $ResolvedEntities    
-    Write-Host "Permissions applied successfully" -ForegroundColor DarkGreen
-    Get-VIPermission|Sort-Object
+
+    Write-Host "$($WhatIf ? 'What if: ' : '') Permissions applied successfully:" -ForegroundColor DarkGreen
+ 
 }
 
+
+# Check if FileName is provided
+if (-not $FileName) {
+    Show-Help
+    exit
+}
 
 $Errors = VerifyPrereqs
 if ($null -ne $Errors) {
     Write-Error ("{0}" -f $Errors)
     exit
 }
-Main
 
+# Prompt for confirmation if WhatIf is not specified
+if (-not $WhatIf) {
+    $confirm = Read-Host "Would you like to add roles? (Y/N)"
+    if ($confirm -ne 'Y') {
+        Write-Host "Operation cancelled by user."
+        exit
+    }
+}
+
+Main -WhatIf:$WhatIf
