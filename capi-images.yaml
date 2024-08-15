@@ -1,0 +1,39 @@
+#@data/values-schema
+
+---
+images:
+
+  - name: "capi-v1.24.9-ova-vsphere-ubuntu-2004"
+    kubernetes_semver: "v1.26.9"
+    kubernetes_series: "v1.26"
+    kubernetes_rpm_version: "v1.26.9"
+    kubernetes_deb_version: "1.26.9-1.1"
+    build_command: "make build-node-ova-vsphere-ubuntu-2004"
+
+  - name: "capi-v1.27.16-ova-vsphere-ubuntu-2404"
+    kubernetes_semver: "v1.27.16"
+    kubernetes_series: "v1.27"
+    kubernetes_rpm_version: "1.27.16"
+    kubernetes_deb_version: "1.27.16-1.1"
+    build_command: "make build-node-ova-vsphere-ubuntu-2404"
+
+  - name: "capi-v1.28.12-ova-vsphere-ubuntu-2404"
+    kubernetes_semver: "v1.28.12"
+    kubernetes_series: "v1.28"
+    kubernetes_rpm_version: "1.28.12"
+    kubernetes_deb_version: "1.28.12-1.1"
+    build_command: "make build-node-ova-vsphere-ubuntu-2404"
+
+  - name: "capi-v1.29.7-ova-vsphere-ubuntu-2404"
+    kubernetes_semver: "v1.29.7"
+    kubernetes_series: "v1.29"
+    kubernetes_rpm_version: "v1.29.7"
+    kubernetes_deb_version: "1.29.7-1.1"
+    build_command: "make build-node-ova-vsphere-ubuntu-2404"
+
+  - name: "capi-k8s-1.30.3-ova-vsphere-ubuntu-2404"
+    kubernetes_semver: "v1.30.3"
+    kubernetes_series: "v1.30"
+    kubernetes_rpm_version: "1.30.3"
+    kubernetes_deb_version: "1.30.3-1.1"
+    build_command: "make build-node-ova-vsphere-ubuntu-2404"
