@@ -1,0 +1,12 @@
+{
+    "vcenter_server":"vcsa.lab.local",
+    "insecure_connection": "true",
+    "username":"packer",
+    "password":"P@ssw0rd!",
+    "datastore":"datastore1",
+    "datacenter":"Datacenter",
+    "resource_pool": "",
+    "cluster": "Cluster",
+    "network": "Datacenter/network/VM Network",
+    "folder": "Templates"
+}

@@ -1,3 +1,17 @@
+Import-Module VMWare.VimAutomation.Core
+Import-Module PSScriptAnalyzer
+
+function Show-Help {
+    Write-Output "Usage: ApplyRoles.ps1 -FileName <path to yaml file>"
+    Write-Output "Example: ApplyRoles.ps1 -FileName ./permissions.yaml"
+}
+
+
+# Function to load and validate YAML file
+function Load-YamlFile {
+
+}
+
 <#
 .SYNOPSIS
     This script applies roles to entities in vCenter based on the permissions defined in a yaml file
