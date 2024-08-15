@@ -119,22 +119,3 @@ function Main() {
     Get-VIPermission|Sort-Object
 }
 Main
-
-function GetVIPermissions($perms) {
-    foreach ($perm in $perms.permissions) {       
-        $EntityType      = $perm.entity_type;
-        $EntityName      = $perm.entity_name;
-        $PrincipalName   = $perm.principal_name;
-        $RoleName        = $perm.role_name;
-        $Record = @{
-            EntityType = $EntityType
-            EntityName = $EntityName
-            PrincipalName = $PrincipalName
-            RoleName = $RoleName
-        }
-        $Record
-        $objects += $Record
-    }
-    return $objects
-}
-
