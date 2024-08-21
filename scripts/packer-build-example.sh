@@ -21,6 +21,11 @@ cat > /tmp/packer.json <<EOF
 }
 EOF
 
+# Checklist
+#
+# 1. Ha din CWD under ~/github.com/image-builder/images/capi/ när du kör make, annars hittar inte packer alla filer.
+# 2. Se till att du har rätt packer.json fil i /tmp/packer.json
+# 3  Se till att alla credentials och sökvägar är rätt.
 
 # Function to build the OVA
 build_ova() {
