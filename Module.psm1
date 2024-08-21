@@ -515,76 +515,147 @@ function SetVIPermission {
     }
 }
 Export-ModuleMember -Function SetVIPermission
-
 function Import-Permissions {
+    [CmdletBinding(SupportsShouldProcess=$true)]
     param (
         [Parameter(Mandatory=$true)]
-        [string]$FileName,
-        [switch]$WhatIf = $true        
+        [string]$FileName
     )
 
     if (-not (Test-Path $FileName)) {
         Write-Error "File: $FileName not found"
-        return $null
+        return
     }
 
-    # File must end with .yaml
     if (-not ($FileName -like "*.yaml")) {
         Write-Error "File: $FileName must be a YAML file"
-        return $null
+        return
     }
 
     $PSObject = ConvertFrom-Yaml -Path $FileName
     $Permissions = $PSObject.permissions
-    $Permissions
 
-    # Check that PSObject has the following property names: role, name, view_type, principal propagate
-    #
     if ($null -eq $Permissions) {
         Write-Error "Permissions is empty"
-        return $null
+        return
     }
-    # Use Get-Member
-    if ($null -eq $Permissions | Get-Member -Name role) {
-        Write-Error "Role is required, its empty"
-        return $null
+
+    $requiredProperties = @('role', 'name', 'view_type', 'principal', 'propagate')
+    foreach ($property in $requiredProperties) {
+        if (-not ($Permissions | Get-Member -Name $property -ErrorAction SilentlyContinue)) {
+            Write-Error "$property is required, but it's missing"
+            return
+        }
     }
-    if ($null -eq $Permissions | Get-Member -Name name) {
-        Write-Error "Name is required, its empty"
-        return $null
-    }
-    if ($null -eq $Permissions | Get-Member -Name view_type) {
-        Write-Error "ViewType is required, its empty"
-        return $null
-    }
-    if ($null -eq $Permissions | Get-Member -Name principal) {
-        Write-Error "Principal is required, its empty"
-        return $null
-    }
-    if ($null -eq $Permissions | Get-Member -Name propagate) {
-        Write-Error "Propagate is required, its empty"
-        return $null
-    }
+
     foreach ($perm in $Permissions) {
-        if($perm -eq $null) {
+        if ($null -eq $perm) {
             Write-Error "Permission is empty"
-            return $null
-        } 
-        if( $perm.role -eq "") {
-            Write-Error "Role is required, its empty"
-            return $null
-        }        
-        # Map "yes" to $true and "no" to $false for propagate
+            return
+        }
+
+        if ([string]::IsNullOrEmpty($perm.role)) {
+            Write-Error "Role is required, but it's empty"
+            return
+        }
+
         $propagateValue = switch ($perm.propagate) {
             "yes" { $true }
             "no" { $false }
             default { $false }
         }
 
-        Write-Host "SetVIPermission -Name $($perm.name) -ViewType $($perm.view_type) -Role $($perm.role) -Principal $($perm.principal) -Propagate $propagateValue -WhatIf:$WhatIf"
-        SetVIPermission -Name $perm.name -ViewType $perm.view_type -Role $perm.role -Principal $perm.principal -Propagate $propagateValue -WhatIf:$WhatIf         
+        if ($PSCmdlet.ShouldProcess("Set VIPermission for $($perm.name)")) {
+            Write-Host "SetVIPermission -Name $($perm.name) -ViewType $($perm.view_type) -Role $($perm.role) -Principal $($perm.principal) -Propagate $propagateValue -WhatIf:$WhatIf"
+            SetVIPermission -Name $perm.name -ViewType $perm.view_type -Role $perm.role -Principal $perm.principal -Propagate $propagateValue -WhatIf:$WhatIf
+        }
     }
+
+    # List all permissions
+    Write-Host "Get-VIPermission -Principal $($perm.principal)"
+    Get-VIPermission -Principal $perm.principal | Format-Table -Property Entity, Role, Propagate
 }
 
 Export-ModuleMember -Function Import-Permissions
+# Import-Roles from yaml file into vCenter
+function Import-Roles {
+    param(
+        [Parameter(Mandatory=$true)]
+        [string]$FileName,
 
+        [switch]$WhatIf = $true
+
+    )
+
+    if (-not (Test-Path $FileName)) {
+        Write-Error "File: $FileName not found"
+        return
+    }
+
+    if (-not ($FileName -like "*.yaml")) {
+        Write-Error "File: $FileName must be a YAML file"
+        return
+    }
+
+    $PSObject = ConvertFrom-Yaml -Path $FileName
+    $Roles = $PSObject.roles
+
+    if ($null -eq $Roles) {
+        Write-Error "Roles is empty"
+        return
+    }
+
+    $requiredProperties = @('name', 'privileges')
+
+    foreach ($role in $Roles) {
+        if ($null -eq $role) {
+            Write-Error "Role is empty"
+            return
+        }
+
+        foreach ($property in $requiredProperties) {
+            if (-not ($role | Get-Member -Name $property -ErrorAction SilentlyContinue)) {
+                Write-Error "$property is required, but it's missing"
+                return
+            }
+        }
+
+        if ([string]::IsNullOrEmpty($role.name)) {
+            Write-Error "Role name is required, but it's empty"
+            return
+        }
+
+        if ($null -eq $role.privileges) {
+            Write-Error "Privileges is empty"
+            return
+        }
+
+        $VIPrivileges=@()
+        for ($i=0; $i -lt $role.privileges.Length; $i++) {
+            $privilege = $role.privileges[$i]
+            $VIPrivileges += Get-VIPrivilege -Id $privilege
+        }
+
+        # Log role name with color
+        Write-Host -ForegroundColor Green "Processing Role: $($role.name)"
+
+        # Log privileges with color
+        Write-Host -ForegroundColor Cyan "Privileges:"
+        foreach ($privilege in $role.privileges) {
+            Write-Host -ForegroundColor Yellow "  - $privilege"
+        }
+
+        # If the role doesn't exist, create it
+        $ExistingRole = Get-VIRole -Name $role.name
+        if ($null -eq $ExistingRole) {
+            Write-Host "Role: $($role.name) not found"
+            Write-Host "Creating role: $($role.name)"
+            Write-Host "Create-VIRole -Name $($role.name) -Privileges $($role.privileges) -WhatIf:$WhatIf"
+            New-VIRole -Name $role.name -Privilege $VIPrivileges -WhatIf:$WhatIf
+            continue
+        } else {
+            Write-Host "Role: $($role.name) found"
+        }
+    }
+}
+Export-ModuleMember -Function Import-Roles

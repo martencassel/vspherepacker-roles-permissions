@@ -2,6 +2,7 @@
 
 cd ~/github.com/image-builder/images/capi/
 
+# Create the packer.json file
 cat > /tmp/packer.json <<EOF
 {
     "vcenter_server":"vcsa.lab.local",
@@ -17,22 +18,19 @@ cat > /tmp/packer.json <<EOF
 }
 EOF
 
-# k8s 1.26.9, ubuntu-2004
-PACKER_LOG=10 PACKER_FLAGS="--var 'kubernetes_rpm_version=1.26.9' --var 'kubernetes_semver=v1.26.9' --var 'kubernetes_series=v1.26' --var 'kubernetes_deb_version=1.26.9-1.1'" PACKER_VAR_FILES="/tmp/packer.json" make build-node-ova-vsphere-ubuntu-2004
 
-# k8s 1.27.16, ubuntu-2404
+# Function to build the OVA
+build_ova() {
+    local kubernetes_version=$1
+    local ubuntu_version=$2
+    PACKER_LOG=10 PACKER_FLAGS="--var 'kubernetes_rpm_version=${kubernetes_version}' --var 'kubernetes_semver=v${kubernetes_version}' --var 'kubernetes_series=v${kubernetes_version%.*}' --var 'kubernetes_deb_version=${kubernetes_version}-1.1'" PACKER_VAR_FILES="/tmp/packer.json" make build-node-ova-vsphere-ubuntu-${ubuntu_version}
+}
 
-PACKER_LOG=10 PACKER_FLAGS="--var 'kubernetes_rpm_version=1.27.16' --var 'kubernetes_semver=v1.27.16' --var 'kubernetes_series=v1.27' --var 'kubernetes_deb_version=1.27.16-1.1'" PACKER_VAR_FILES="/tmp/packer.json" make build-node-ova-vsphere-ubuntu-2404
+# Build OVAs for different Kubernetes versions and Ubuntu versions
+build_ova "1.26.9" "2004"
+build_ova "1.27.16" "2404"
+build_ova "1.28.12" "2404"
+build_ova "1.29.7" "2404"
+build_ova "1.30.3" "2404"
 
-# k8s 1.28.12, ubuntu-2404
-
-PACKER_LOG=10 PACKER_FLAGS="--var 'kubernetes_rpm_version=1.28.12' --var 'kubernetes_semver=v1.28.12' --var 'kubernetes_series=v1.28' --var 'kubernetes_deb_version=1.28.12-1.1'" PACKER_VAR_FILES="/tmp/packer.json" make build-node-ova-vsphere-ubuntu-2404
-
-# k8s 1.29.7, ubuntu-2404
-
-PACKER_LOG=10 PACKER_FLAGS="--var 'kubernetes_rpm_version=1.29.7' --var 'kubernetes_semver=v1.29.7' --var 'kubernetes_series=v1.29' --var 'kubernetes_deb_version=1.29.7-1.1'" PACKER_VAR_FILES="/tmp/packer.json" make build-node-ova-vsphere-ubuntu-2404
-
-# k8s 1.30.3, ubuntu-2404
-
-PACKER_LOG=10 PACKER_FLAGS="--var 'kubernetes_rpm_version=1.30.3' --var 'kubernetes_semver=v1.30.3' --var 'kubernetes_series=v1.30' --var 'kubernetes_deb_version=1.30.3-1.1'" PACKER_VAR_FILES="/tmp/packer.json" make build-node-ova-vsphere-ubuntu-2404
-
+ 

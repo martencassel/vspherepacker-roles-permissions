@@ -31,5 +31,5 @@ permissions:
     name: "k8s-batch"
     view_type: "Folder"
     principal: "LAB.LOCAL\\k8s-batch-cns"
-    propagate: "no"
+    propagate: "yes"
 

@@ -2,8 +2,34 @@
 
 ---
 permissions:
+  
+  - role: "ReadOnly"
+    name: "Datacenters"
+    view_type: "Folder"
+    principal: "LAB.LOCAL\\k8s-batch-cpi"
+    propagate: "no"
 
-  - role_name: "CNS-Datastore"
-    entity_name: "Datacenter"
-    entity_type: "Datacenter"
-    principal_name: "LAB.LOCAL\\k8s-batch-cpi"
+  - role: "ReadOnly"
+    name: "Datacenter"
+    view_type: "Datacenter"
+    principal: "LAB.LOCAL\\k8s-batch-cpi"
+    propagate: "no"
+
+  - role: "ReadOnly"
+    name: "192.168.3.50"
+    view_type: "HostSystem"
+    principal: "LAB.LOCAL\\k8s-batch-cpi"
+    propagate: "no"
+
+  - role: "ReadOnly"
+    name: "datastore1"
+    view_type: "Datastore"
+    principal: "LAB.LOCAL\\k8s-batch-cpi"
+    propagate: "no"
+
+  - role: "ReadOnly"
+    name: "k8s-batch"
+    view_type: "Folder"
+    principal: "LAB.LOCAL\\k8s-batch-cpi"
+    propagate: "yes"
+
