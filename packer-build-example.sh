@@ -1,5 +1,8 @@
 #!/bin/bash
 
+cd ~/github.com/
+git clone https://github.com/kubernetes-sigs/image-builder.git
+
 cd ~/github.com/image-builder/images/capi/
 
 # Create the packer.json file
