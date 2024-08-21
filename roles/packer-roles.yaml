@@ -1,4 +1,7 @@
 #@data/values-schema
+
+# https://vmware-samples.github.io/packer-examples-for-vsphere/getting-started/privileges/#required-privileges
+
 ---
 roles:
 

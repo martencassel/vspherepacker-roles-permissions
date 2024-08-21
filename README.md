@@ -18,6 +18,25 @@ Import-Permissions ./permissions/k8s-batch/k8s-batch-cns.yaml  -WhatIf:$false
 # Check the effect, by filtering by principal
 Get-VIPermission -principal "LAB.LOCAL\k8s-batch-cns"
 
+
+# Example update of propagate flag
+SetVIPermission `
+    -Role "CNS-SEARCH-AND-SPBM" `
+    -Name "Datacenter" `
+    -ViewType "Datacenter" `
+    -Principal "LAB.LOCAL\k8s-batch-cns" -Propagate $true
+
+Get-VIPermission -principal "LAB.LOCAL\k8s-batch-cns"
+
+SetVIPermission `
+    -Role "CNS-SEARCH-AND-SPBM" `
+    -Name "Datacenter" `
+    -ViewType "Datacenter" `
+    -Principal "LAB.LOCAL\k8s-batch-cns" -Propagate $false
+
+
+Get-VIPermission -principal "LAB.LOCAL\k8s-batch-cns"
+
 ```
 
 
