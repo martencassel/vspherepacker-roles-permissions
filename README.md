@@ -1,14 +1,25 @@
 ### Setup permissions
 
 ```powershell
-./ImportRoles.ps1 -FileName ./packer-roles.yaml
-./ApplyRoles.ps1 -FileName ./packer-permissions.yaml
+
+# Import module
+Import-Module ./Module.psm1
+
+# List cmdlets
+Get-Command -Module Module
+
+# Import all permissions, use whatif
+Import-Permissions ./permissions/k8s-batch/k8s-batch-cns.yaml  -WhatIf:$true
+
+# Import them withouth whatif
+Import-Permissions ./permissions/k8s-batch/k8s-batch-cns.yaml  -WhatIf:$true
+
+
+# Check the effect, by filtering by principal
+Get-VIPermission -principal "LAB.LOCAL\k8s-batch-cns"
+
 ```
 
-```powershell
-./ImportRoles.ps1 -FileName ./cns-roles.yaml
-./ApplyRoles.ps1 -FileName ./cns-permissions.yaml
-```
 
 ### Building CPI images using packer
 

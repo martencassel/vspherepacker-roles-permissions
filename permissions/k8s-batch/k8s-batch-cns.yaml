@@ -1,0 +1,35 @@
+#@data/values-schema
+
+---
+permissions:
+  
+  - role: "CNS-SEARCH-AND-SPBM"
+    name: "Datacenters"
+    view_type: "Folder"
+    principal: "LAB.LOCAL\\k8s-batch-cns"
+    propagate: "no"
+
+  - role: "ReadOnly"
+    name: "Datacenter"
+    view_type: "Datacenter"
+    principal: "LAB.LOCAL\\k8s-batch-cns"
+    propagate: "no"
+
+  - role: "CNS-HOST-CONFIG-STORAGE"
+    name: "192.168.3.50"
+    view_type: "HostSystem"
+    principal: "LAB.LOCAL\\k8s-batch-cns"
+    propagate: "no"
+
+  - role: "CNS-Datastore"
+    name: "datastore1"
+    view_type: "Datastore"
+    principal: "LAB.LOCAL\\k8s-batch-cns"
+    propagate: "no"
+
+  - role: "CNS-VM"
+    name: "k8s-batch"
+    view_type: "Folder"
+    principal: "LAB.LOCAL\\k8s-batch-cns"
+    propagate: "no"
+

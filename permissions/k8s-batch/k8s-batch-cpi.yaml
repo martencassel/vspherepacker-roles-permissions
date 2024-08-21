@@ -1,0 +1,9 @@
+#@data/values-schema
+
+---
+permissions:
+
+  - role_name: "CNS-Datastore"
+    entity_name: "Datacenter"
+    entity_type: "Datacenter"
+    principal_name: "LAB.LOCAL\\k8s-batch-cpi"
