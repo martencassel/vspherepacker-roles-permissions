@@ -1,4 +1,4 @@
-### Setup permissions
+### Setup vSphere Roles/Permissions using YAML files
 
 ```powershell
 
@@ -13,7 +13,6 @@ Import-Permissions ./permissions/k8s-batch/k8s-batch-cns.yaml  -WhatIf:$true
 
 # Import them withouth whatif
 Import-Permissions ./permissions/k8s-batch/k8s-batch-cns.yaml  -WhatIf:$false
-
 
 # Check the effect, by filtering by principal
 Get-VIPermission -principal "LAB.LOCAL\k8s-batch-cns"
