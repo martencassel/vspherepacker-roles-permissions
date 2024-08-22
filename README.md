@@ -59,4 +59,5 @@ cd ~/github.com/image-builder/images/capi/
 ls -lt /tmp/packer*
 
 ```
- 
+  
+[![asciicast](https://asciinema.org/a/eRSHL768vLB04OyNOKR9FhK0f.svg)](https://asciinema.org/a/eRSHL768vLB04OyNOKR9FhK0f)
