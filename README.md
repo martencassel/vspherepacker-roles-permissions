@@ -39,13 +39,24 @@ Get-VIPermission -principal "LAB.LOCAL\k8s-batch-cns"
 
 ```
 
-### Simplified
+### Getting started with CAPI image builds
 
 ```bash
 
+# The packer script uses the "packer" account with permission defined using the powershell module
 
-~/github.com/vsphere-packer-roles/scripts/build-ova.sh ~/github.com/vsphere-packer-roles/config/packer.json 1.31.0 2404
+# Make sure that the settings for vsphere packer plugin are correct:
+vim  ~/github.com/vsphere-packer-roles/config/packer.json
 
+# Change the working directory to be image-builder directory
+cd ~/github.com/image-builder/images/capi/
+
+# Try running the build
+~/github.com/vsphere-packer-roles/scripts/build-ova.sh \
+    ~/github.com/vsphere-packer-roles/config/packer.json 1.31.0 2404
+
+# Packer log files are availebl in /tmp/packer*
+ls -lt /tmp/packer*
 
 ```
  
