@@ -57,6 +57,16 @@ function Import-Yaml {
 }
 Export-ModuleMember -Function Import-Yaml
 
+<#
+    .SYNOPSIS
+    Ensure-VIPermission
+
+    .DESCRIPTION
+    Ensure-VIPermission
+
+    .PARAMETER Entity
+    The entity object
+#>
 Function Ensure-VIPermission {
     # If it doesn't exist, create it
     param (
@@ -101,6 +111,20 @@ Function Ensure-VIPermission {
 }
 Export-ModuleMember -Function Ensure-VIPermission
 
+<#
+    .SYNOPSIS
+    Convert YAML to PSObject
+
+    .DESCRIPTION
+    Convert YAML to PSObject
+
+    .PARAMETER Path
+    The path to the YAML file
+
+    .EXAMPLE
+
+    ConvertFrom-Yaml -Path "permissions.yaml"
+#>
 function ConvertFrom-Yaml {
     param (
         [Parameter(Mandatory=$true)]
@@ -137,6 +161,24 @@ function ConvertFrom-Yaml {
 
 Export-ModuleMember -Function ConvertFrom-Yaml
 
+<#
+    .SYNOPSIS
+    Get VI Entity
+
+    .DESCRIPTION
+    Get VI Entity
+
+    .PARAMETER EntityName
+    The entity name
+
+    .PARAMETER EntityTypeName
+    The entity type name
+
+    .EXAMPLE
+
+    Get-VIEntity -EntityName "MyVirtualMachine" -EntityTypeName "VirtualMachine"
+
+#>
 function Get-VIEntity {
     param (
         [Parameter(Mandatory=$true)]
@@ -163,29 +205,23 @@ function Get-VIEntity {
 Export-ModuleMember -Function Get-VIEntity
 
 <#
-.SYNOPSIS
-    Get permission for a principal
+    .SYNOPSIS
+    Update VI Permission
 
-.DESCRIPTION
+    .DESCRIPTION
+    Update VI Permission
 
-    Get permission for a principal
+    .PARAMETER Permission
+    The permission object
 
-.PARAMETER Principal
-    Principal name
+    .PARAMETER Principal
+    The principal name
 
-.PARAMETER RoleName
-    Role name
+    .PARAMETER Role
+    The role object
 
-.PARAMETER Entity
-    Entity name
-
-.EXAMPLE
-    $perm = GetPermission -Principal "LAB.LOCAL\k8s-batch-cns" -RoleName "CNS-VM"
-
-    $perm = GetPermission -Principal "LAB.LOCAL\k8s-batch-cns"
-
-    $perm = GetPermission -Principal "LAB.LOCAL\k8s-batch-cns" -Entity "vm"
-
+    .PARAMETER Propagate
+    Propagate the permission
 
 #>
 function Update-VIPermission {
@@ -242,6 +278,32 @@ function Update-VIPermission {
 }
 Export-ModuleMember -Function Update-VIPermission
 
+
+<#
+.SYNOPSIS
+    Get permission for a principal
+
+.DESCRIPTION
+
+    Get permission for a principal
+
+.PARAMETER Principal
+    Principal name
+
+.PARAMETER RoleName
+    Role name
+
+.PARAMETER Entity
+    Entity name
+
+.EXAMPLE
+    $perm = GetPermission -Principal "LAB.LOCAL\k8s-batch-cns" -RoleName "CNS-VM"
+
+    $perm = GetPermission -Principal "LAB.LOCAL\k8s-batch-cns"
+
+    $perm = GetPermission -Principal "LAB.LOCAL\k8s-batch-cns" -Entity "vm"
+
+#>
 function GetPermission {
     param (
         [Parameter(Mandatory=$true)]
@@ -393,6 +455,24 @@ Function Example3() {
 }
 Export-ModuleMember -Function Example3
 
+
+<#
+    .SYNOPSIS
+    Get VI Object by VI View
+
+    .DESCRIPTION
+
+    Get VI Object by VI View
+
+    .PARAMETER VIView
+    The VI View
+
+    .EXAMPLE
+
+    $FolderViews = Get-View -ViewType Folder
+    $Folders = Get-VIObjectByVIView $FolderViews
+    $Folders | Format-Table -Property Name, Parent
+#>
 Function Get-VIObject($Name, $ViewType) {
     $FolderViews = Get-View -ViewType Folder
     $Folders = Get-VIObjectByVIView $FolderViews
@@ -400,52 +480,75 @@ Function Get-VIObject($Name, $ViewType) {
 }
 
 <#
+    .SYNOPSIS
+    Set VI Permission.
 
-.EXAMPLE
-   
-    SetVIPermission `
-        -Role "CNS-SEARCH-AND-SPBM" `
-        -Name "Datacenter" `
-        -ViewType "Datacenter" `
-        -Principal "LAB.LOCAL\k8s-batch-cns" -Propagate $false
+    .DESCRIPTION
 
-    SetVIPermission `
-        -Role "ReadOnly" `
-        -Name "Datacenter" `
-        -ViewType "Datacenter" `
-        -Principal "LAB.LOCAL\k8s-batch-cns" -Propagate $false
+    Set VI Permission, if it doesn't exist, create it.
+    This is intended to be Idempotent.
 
-    SetVIPermission `
-        -Role "CNS-HOST-CONFIG-STORAGE" `
-        -Name "192.168.3.50" `
-        -ViewType "HostSystem" `
-        -Principal "LAB.LOCAL\k8s-batch-cns" -Propagate $false
+    .PARAMETER Name
+    The name of the entity
 
-    SetVIPermission `
-        -Role "CNS-Datastore" `
-        -Name "datastore1" `
-        -ViewType "Datastore" `
-        -Principal "LAB.LOCAL\k8s-batch-cns" -Propagate $false
+    .PARAMETER ViewType
+    The view type of the entity. Get-VIObjectByVIView will be used to find the entity.
+    Each viewtype can be fetched by Get-VIVIew -ViewType <ViewType>.
 
-    SetVIPermission `
-        -Role "CNS-VM" `
-        -Name "k8s-batch" `
-        -ViewType "Folder" `
-        -Principal "LAB.LOCAL\k8s-batch-cns" -Propagate $false
+    .PARAMETER Role
+    The role name
 
-    SetVIPermission `
-        -Role "CNS-VM" `
-        -Name "k8s-batch" `
-        -ViewType "Folder" `
-        -Principal "LAB.LOCAL\k8s-batch-cns" -Propagate $true
+    .PARAMETER Principal
+    The principal name
 
-    Get-VIPermission -Principal "LAB.LOCAL\k8s-batch-cns" | Format-Table -Property Entity, Role, Propagate
+    .PARAMETER Propagate
+    Propagate the permission
 
-     SetVIPermission `
-        -Role "CNS-VM" `
-        -Name "k8s-batch" `
-        -ViewType "Folder" `
-        -Principal "LAB.LOCAL\k8s-batch-cns" -Propagate $false
+    .EXAMPLE
+    
+        SetVIPermission `
+            -Role "CNS-SEARCH-AND-SPBM" `
+            -Name "Datacenter" `
+            -ViewType "Datacenter" `
+            -Principal "LAB.LOCAL\k8s-batch-cns" -Propagate $false
+
+        SetVIPermission `
+            -Role "ReadOnly" `
+            -Name "Datacenter" `
+            -ViewType "Datacenter" `
+            -Principal "LAB.LOCAL\k8s-batch-cns" -Propagate $false
+
+        SetVIPermission `
+            -Role "CNS-HOST-CONFIG-STORAGE" `
+            -Name "192.168.3.50" `
+            -ViewType "HostSystem" `
+            -Principal "LAB.LOCAL\k8s-batch-cns" -Propagate $false
+
+        SetVIPermission `
+            -Role "CNS-Datastore" `
+            -Name "datastore1" `
+            -ViewType "Datastore" `
+            -Principal "LAB.LOCAL\k8s-batch-cns" -Propagate $false
+
+        SetVIPermission `
+            -Role "CNS-VM" `
+            -Name "k8s-batch" `
+            -ViewType "Folder" `
+            -Principal "LAB.LOCAL\k8s-batch-cns" -Propagate $false
+
+        SetVIPermission `
+            -Role "CNS-VM" `
+            -Name "k8s-batch" `
+            -ViewType "Folder" `
+            -Principal "LAB.LOCAL\k8s-batch-cns" -Propagate $true
+
+        Get-VIPermission -Principal "LAB.LOCAL\k8s-batch-cns" | Format-Table -Property Entity, Role, Propagate
+
+        SetVIPermission `
+            -Role "CNS-VM" `
+            -Name "k8s-batch" `
+            -ViewType "Folder" `
+            -Principal "LAB.LOCAL\k8s-batch-cns" -Propagate $false
 
 #>
 function SetVIPermission {
@@ -515,6 +618,24 @@ function SetVIPermission {
     }
 }
 Export-ModuleMember -Function SetVIPermission
+
+<#
+    .SYNOPSIS
+    Import permissions from a YAML file
+
+    .DESCRIPTION
+    Import permissions from a YAML file
+
+    .PARAMETER FileName
+    The name of the YAML file to import
+
+    .PARAMETER WhatIf
+    Perform a dry run of the import
+
+    .EXAMPLE
+
+    Import-Permissions -FileName "permissions.yaml"
+#>
 function Import-Permissions {
     [CmdletBinding(SupportsShouldProcess=$true)]
     param (
@@ -575,9 +696,25 @@ function Import-Permissions {
     Write-Host "Get-VIPermission -Principal $($perm.principal)"
     Get-VIPermission -Principal $perm.principal | Format-Table -Property Entity, Role, Propagate
 }
-
 Export-ModuleMember -Function Import-Permissions
-# Import-Roles from yaml file into vCenter
+
+<#
+    .SYNOPSIS
+    Import roles from a YAML file
+
+    .DESCRIPTION
+    Import roles from a YAML file
+
+    .PARAMETER FileName
+    The name of the YAML file to import
+
+    .PARAMETER WhatIf
+    Perform a dry run of the import
+
+    .EXAMPLE
+
+    Import-Roles -FileName "roles.yaml"
+#>
 function Import-Roles {
     param(
         [Parameter(Mandatory=$true)]
