@@ -38,6 +38,8 @@ Get-VIPermission -principal "LAB.LOCAL\k8s-batch-cns"
 
 ```
 
+[![asciicast](https://asciinema.org/a/WAWalJG2td5HqlTUguB51hsdK.svg)](https://asciinema.org/a/WAWalJG2td5HqlTUguB51hsdK)
+
 ### Getting started with CAPI image builds
 
 ```bash
