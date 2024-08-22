@@ -37,6 +37,7 @@ SetVIPermission `
 Get-VIPermission -principal "LAB.LOCAL\k8s-batch-cns"
 
 ```
+### Example: Update propagate flag
 
 [![asciicast](https://asciinema.org/a/WAWalJG2td5HqlTUguB51hsdK.svg)](https://asciinema.org/a/WAWalJG2td5HqlTUguB51hsdK)
 
@@ -60,5 +61,6 @@ cd ~/github.com/image-builder/images/capi/
 ls -lt /tmp/packer*
 
 ```
+### Example: Build Ubuntu 24.04 OVA
   
 [![asciicast](https://asciinema.org/a/eRSHL768vLB04OyNOKR9FhK0f.svg)](https://asciinema.org/a/eRSHL768vLB04OyNOKR9FhK0f)
